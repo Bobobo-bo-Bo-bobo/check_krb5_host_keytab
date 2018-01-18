@@ -12,6 +12,8 @@ REALM=""
 HOSTNAME=$(hostname)
 FORCE_UPPERCASE="no"
 
+export PATH="/bin:/usr/bin:/sbin:/usr/sbin:${PATH}"
+
 function usage() {
 	echo "Copyright (C) 2015 - 2018 by Andreas Maus <ecbeb08bb9f1b8e8f421fbf4c28e3033ecb13bc0@ypbind.de>"
 	echo "This program comes with ABSOLUTELY NO WARRANTY."
