@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH="/bin:/usr/bin:/sbin:/usr/sbin:${PATH}"
+
 short_options="hR:H:u"
 long_options="help,realm=,hostname=,uppercase"
 
@@ -9,13 +11,11 @@ CRITICAL=2
 UNKNOWN=3
 
 REALM=""
-HOSTNAME=$(hostname)
+HOSTNAME=""
 FORCE_UPPERCASE="no"
 
-export PATH="/bin:/usr/bin:/sbin:/usr/sbin:${PATH}"
-
 function usage() {
-	echo "Copyright (C) 2015 - 2018 by Andreas Maus <ecbeb08bb9f1b8e8f421fbf4c28e3033ecb13bc0@ypbind.de>"
+	echo "Copyright (C) by Andreas Maus <ecbeb08bb9f1b8e8f421fbf4c28e3033ecb13bc0@ypbind.de>"
 	echo "This program comes with ABSOLUTELY NO WARRANTY."
 	echo ""
 	echo "This program is distributed under the Terms of the GNU General"
@@ -99,27 +99,33 @@ if [ ${?} -ne 0 ]; then
 fi
 
 if [ -z "${HOSTNAME}" ]; then
+	# if hostname has been set to the FQDN truncate it to the short hostname
+	if [ "$(uname -s)" = "Linux" ]; then
+		# only Linux has hostname --fqdn, on other UNIXes hostname --fqdn will
+		# set the hostname to --fqdn
+		if [ "$(hostname)" = "$(hostname --fqdn)" ]; then
+			HOSTNAME="$(hostname --short)"
+		else
+			HOSTNAME="$(hostname)"
+		fi
+	else
+		# a dot in the hostname is a good (but not the perfect) indication
+		# of a FQDN
+		if echo "${HOSTNAME}" | greq -q '\.'; then
+			HOSTNAME="$(hostname | cut -d '.' -f 1)"
+		fi
+	fi
+fi
+
+if [ -z "${HOSTNAME}" ]; then
 	echo "Error: Can't get hostname"
 	exit ${CRITICAL}
 fi
 
-# if hostname has been set to the FQDN truncate it to the short hostname
-if [ "$(uname -s)" = "Linux" ]; then
-	# only Linux has hostname --fqdn, on other UNIXes hostname --fqdn will
-	# set the hostname to --fqdn
-	if [ "$(hostname)" = "$(hostname --fqdn)" ]; then
-		HOSTNAME=$(hostname --short)
-	fi
-else
-	# a dot in the hostname is a good (but not the perfect) indication
-	# of a FQDN
-	if echo "${HOSTNAME}" | greq -q '\.'; then
-		HOSTNAME=$(hostname | cut -d '.' -f 1)
-	fi
-fi
-
 if [ "${FORCE_UPPERCASE}" = "yes" ]; then
 	HOSTNAME=$(echo "${HOSTNAME}" | tr '[:lower:]' '[:upper:]')
+else
+	HOSTNAME=$(echo "${HOSTNAME}" | tr '[:upper:]' '[:lower:]')
 fi
 
 kinit -k "${HOSTNAME}\$@${REALM}" >/dev/null 2>&1
