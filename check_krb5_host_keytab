@@ -27,7 +27,7 @@ function usage() {
 	echo "  --help"
 	echo ""
 	echo "  -H <hostname>		Force hostname to use."
-	echo "  --hostname=<hostname>	Optional, default: ${HOSTNAME}"
+	echo "  --hostname=<hostname>	Optional, default: $(hostname)"
 	echo ""
 	echo "  -R <realm>		Set kerberos realm to check."
 	echo "  --realm=<realm>		Mandatory."
