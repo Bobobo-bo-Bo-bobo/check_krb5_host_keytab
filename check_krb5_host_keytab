@@ -2,8 +2,10 @@
 
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:${PATH}"
 
+VERSION="1.0.3"
+
 short_options="hR:H:u"
-long_options="help,realm=,hostname=,uppercase"
+long_options="help,realm:,hostname:,uppercase"
 
 OK=0
 WARNING=1
@@ -15,26 +17,28 @@ HOSTNAME=""
 FORCE_UPPERCASE="no"
 
 function usage() {
-	echo "Copyright (C) 2018-2020 by Andreas Maus <ecbeb08bb9f1b8e8f421fbf4c28e3033ecb13bc0@ypbind.de>"
-	echo "This program comes with ABSOLUTELY NO WARRANTY."
-	echo ""
-	echo "This program is distributed under the Terms of the GNU General"
-	echo "Public License Version 3. (http://www.gnu.org/copyleft/gpl.html)"
-	echo ""
-        echo "Usage: $0 [-h|--help] [-H <hostname>|--hostname=<hostname>] -R <realm>|--realm=<realm> [-u|--uppercase]"
-	echo ""
-	echo "  -h			Shows (this) help."
-	echo "  --help"
-	echo ""
-	echo "  -H <hostname>		Force hostname to use."
-	echo "  --hostname=<hostname>	Optional, default: $(hostname)"
-	echo ""
-	echo "  -R <realm>		Set kerberos realm to check."
-	echo "  --realm=<realm>		Mandatory."
-	echo ""
-	echo "  -u			Convert hostname to UPPERCASE."
-	echo "  --uppercase		Optional, default: ${FORCE_UPPERCASE}"
-	echo ""
+    echo "check_krb5_host_keytab version ${VERSION}"
+    echo ""
+    echo "Copyright (C) 2018-2020 by Andreas Maus <ecbeb08bb9f1b8e8f421fbf4c28e3033ecb13bc0@ypbind.de>"
+    echo "This program comes with ABSOLUTELY NO WARRANTY."
+    echo ""
+    echo "This program is distributed under the Terms of the GNU General"
+    echo "Public License Version 3. (http://www.gnu.org/copyleft/gpl.html)"
+    echo ""
+    echo "Usage: $0 [-h|--help] [-H <hostname>|--hostname=<hostname>] -R <realm>|--realm=<realm> [-u|--uppercase]"
+    echo ""
+    echo "  -h			Shows (this) help."
+    echo "  --help"
+    echo ""
+    echo "  -H <hostname>		Force hostname to use."
+    echo "  --hostname=<hostname>	Optional, default: $(hostname)"
+    echo ""
+    echo "  -R <realm>		Set kerberos realm to check."
+    echo "  --realm=<realm>		Mandatory."
+    echo ""
+    echo "  -u			Convert hostname to UPPERCASE."
+    echo "  --uppercase		Optional, default: ${FORCE_UPPERCASE}"
+    echo ""
 }
 
 optparse=$(getopt -o ${short_options} --long ${long_options} -n "$(basename $0)" -- "$@")
