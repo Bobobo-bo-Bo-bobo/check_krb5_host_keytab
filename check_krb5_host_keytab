@@ -15,7 +15,7 @@ HOSTNAME=""
 FORCE_UPPERCASE="no"
 
 function usage() {
-	echo "Copyright (C) by Andreas Maus <ecbeb08bb9f1b8e8f421fbf4c28e3033ecb13bc0@ypbind.de>"
+	echo "Copyright (C) 2018-2020 by Andreas Maus <ecbeb08bb9f1b8e8f421fbf4c28e3033ecb13bc0@ypbind.de>"
 	echo "This program comes with ABSOLUTELY NO WARRANTY."
 	echo ""
 	echo "This program is distributed under the Terms of the GNU General"
@@ -78,62 +78,62 @@ while true; do
 done
 
 if [ -z "${REALM}" ]; then
-        echo "ERROR: Kerberos realm is mandatory"
-	echo ""
-	usage
-        exit ${UNKNOWN}
+    echo "ERROR: Kerberos realm is mandatory"
+    echo ""
+    usage
+    exit ${UNKNOWN}
 fi
 
 which kinit >/dev/null 2>&1
 
 if [ ${?} -ne 0 ]; then
-	echo "Error: kinit not found or not executable"
-	exit ${UNKNOWN}
+    echo "Error: kinit not found or not executable"
+    exit ${UNKNOWN}
 fi
 
 which kdestroy >/dev/null 2>&1
 
 if [ ${?} -ne 0 ]; then
-	echo "Error: kdestroy not found or not executable"
-	exit ${UNKNOWN}
+    echo "Error: kdestroy not found or not executable"
+    exit ${UNKNOWN}
 fi
 
 if [ -z "${HOSTNAME}" ]; then
-	# if hostname has been set to the FQDN truncate it to the short hostname
-	if [ "$(uname -s)" = "Linux" ]; then
-		# only Linux has hostname --fqdn, on other UNIXes hostname --fqdn will
-		# set the hostname to --fqdn
-		if [ "$(hostname)" = "$(hostname --fqdn)" ]; then
-			HOSTNAME="$(hostname --short)"
-		else
-			HOSTNAME="$(hostname)"
-		fi
+    # if hostname has been set to the FQDN truncate it to the short hostname
+    if [ "$(uname -s)" = "Linux" ]; then
+	# only Linux has hostname --fqdn, on other UNIXes hostname --fqdn will
+	# set the hostname to --fqdn
+	if [ "$(hostname)" = "$(hostname --fqdn)" ]; then
+	    HOSTNAME="$(hostname --short)"
 	else
-		# a dot in the hostname is a good (but not the perfect) indication
-		# of a FQDN
-		if echo "${HOSTNAME}" | greq -q '\.'; then
-			HOSTNAME="$(hostname | cut -d '.' -f 1)"
-		fi
+	    HOSTNAME="$(hostname)"
 	fi
+    else
+	# a dot in the hostname is a good (but not the perfect) indication
+	# of a FQDN
+	if echo "${HOSTNAME}" | greq -q '\.'; then
+	    HOSTNAME="$(hostname | cut -d '.' -f 1)"
+	fi
+    fi
 fi
 
 if [ -z "${HOSTNAME}" ]; then
-	echo "Error: Can't get hostname"
-	exit ${CRITICAL}
+    echo "Error: Can't get hostname"
+    exit ${CRITICAL}
 fi
 
 if [ "${FORCE_UPPERCASE}" = "yes" ]; then
-	HOSTNAME=$(echo "${HOSTNAME}" | tr '[:lower:]' '[:upper:]')
+    HOSTNAME=$(echo "${HOSTNAME}" | tr '[:lower:]' '[:upper:]')
 else
-	HOSTNAME=$(echo "${HOSTNAME}" | tr '[:upper:]' '[:lower:]')
+    HOSTNAME=$(echo "${HOSTNAME}" | tr '[:upper:]' '[:lower:]')
 fi
 
-kinit -k "${HOSTNAME}\$@${REALM}" >/dev/null 2>&1
+kinit -k "host/${HOSTNAME}@${REALM}" >/dev/null 2>&1
 if [ ${?} -ne 0 ]; then
-	echo "No valid domain trust to kerberos realm ${REALM}"
-	exit ${CRITICAL}
+    echo "No valid domain trust to kerberos realm ${REALM}"
+    exit ${CRITICAL}
 else
-	echo "Valid domain trust to kerberos realm ${REALM}"
-	exit ${OK}
+    echo "Valid domain trust to kerberos realm ${REALM}"
+    exit ${OK}
 fi
 
